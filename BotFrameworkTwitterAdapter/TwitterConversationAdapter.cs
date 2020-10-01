@@ -43,7 +43,7 @@ namespace BotFrameworkTwitterAdapter
                 var replyTweet = twitterService.SendReply(
                     activity.Text,
                     mediaUrls,
-                    long.Parse(activity.Recipient.Id),
+                    long.Parse(activity.Conversation.Id),
                     activity.Recipient.Name);
 
                 responses.Add(new ResourceResponse(activity.Id));
@@ -52,7 +52,7 @@ namespace BotFrameworkTwitterAdapter
             return responses.ToArray();
         }
 
-        protected virtual async void OnTweetReceivedAsync(object sender, MatchedTweetReceivedEventArgs messageEventArgs)
+        private async void OnTweetReceivedAsync(object sender, MatchedTweetReceivedEventArgs messageEventArgs)
         {
             TurnContext context = null;
 
@@ -84,7 +84,7 @@ namespace BotFrameworkTwitterAdapter
                 From = new ChannelAccount(tweet.CreatedBy.IdStr, tweet.CreatedBy.ScreenName),
                 Recipient = new ChannelAccount(tweet.InReplyToUserIdStr, tweet.InReplyToScreenName),
                 Conversation = new ConversationAccount { Id = conversationId },
-                ChannelId = "twitter"
+                ChannelId = "twitter_conversation"
             };
         }
 
