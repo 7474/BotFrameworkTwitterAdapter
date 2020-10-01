@@ -1,4 +1,5 @@
 ﻿using BotFrameworkTwitterAdapter.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -12,11 +13,8 @@ using Tweetinvi.Parameters;
 
 namespace BotFrameworkTwitterAdapter.Services
 {
-    public class TwitterService: IDisposable
+    public class TwitterService : IDisposable
     {
-        /// <summary>
-        /// True, if the Twitter stream is ready (started). False otherwise.
-        /// </summary>
         public bool IsReady
         {
             get;
@@ -31,8 +29,11 @@ namespace BotFrameworkTwitterAdapter.Services
         private IUser _botUser;
         private Tweetinvi.Streaming.IFilteredStream _filteredStream;
 
-        public TwitterService(IOptions<TwitterConversationOptions> options)
+        private readonly ILogger<TwitterService> logger;
+
+        public TwitterService(IOptions<TwitterConversationOptions> options, ILoggerFactory loggerFactory)
         {
+            logger = loggerFactory.CreateLogger<TwitterService>();
             var option = options.Value;
             if (string.IsNullOrEmpty(option.ConsumerKey) || string.IsNullOrEmpty(option.ConsumerSecret))
             {
@@ -81,23 +82,22 @@ namespace BotFrameworkTwitterAdapter.Services
             }
             else
             {
-                Debug.WriteLine("Twitter stream already started");
+                logger.LogWarning("Twitter stream already started");
             }
         }
 
         private void OnStreamStarted(object sender, EventArgs e)
         {
-            Debug.WriteLine("Twitter stream started");
+            logger.LogInformation("Twitter stream started");
             IsReady = true;
         }
 
         private void OnMatchingTweetReceived(object sender, Tweetinvi.Events.MatchedTweetReceivedEventArgs e)
         {
-            Debug.WriteLine("OnMatchingTweetReceived Twitter message received");
-            Debug.WriteLine(JsonConvert.SerializeObject(e));
+            logger.LogInformation($"OnMatchingTweetReceived Twitter message received. {JsonConvert.SerializeObject(e)}");
             if (e.Tweet.CreatedBy.Id == _botUser.Id)
             {
-                Debug.WriteLine("Skip. Tweet is created by bot.");
+                logger.LogInformation("Skip. Tweet is created by bot.");
                 return;
             }
             TweetReceived?.Invoke(this, e);
@@ -110,6 +110,7 @@ namespace BotFrameworkTwitterAdapter.Services
             long replyToId,
             params string[] toScreanNames)
         {
+            logger.LogInformation($"SendReply. {replyToId} {messageText}");
             var replyTo = new TweetIdentifier(replyToId);
             var atNames = string.Join(" ",
                 toScreanNames
