@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.0</Version>
+    <Authors>koudenpa</Authors>
+    <Product />
+    <Company />
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/7474/BotFrameworkTwitterAdapter</RepositoryUrl>
+    <Description />
   </PropertyGroup>
 
   <ItemGroup>
