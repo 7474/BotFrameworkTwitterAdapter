@@ -1,4 +1,4 @@
-﻿using BotFrameworkTwitterAdapter.Extensions;
+using BotFrameworkTwitterAdapter.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -71,6 +71,7 @@ namespace BotFrameworkTwitterAdapter.Services
 
         public void StartStream()
         {
+            logger.LogInformation("Twitter stream start");
             if (_filteredStream == null)
             {
                 // For Reply
@@ -120,13 +121,19 @@ namespace BotFrameworkTwitterAdapter.Services
                     .Distinct()
                     .Select(x => "@" + x));
 
+            // 動画なら1件だけ、他は画像とみなして4件まで
+            var videoMediaUrls = mediaUrls
+                .Where(x => x.ToLower().EndsWith("gif") || x.ToLower().EndsWith("api"));
+            var attachMediaUrls = videoMediaUrls.Any()
+                ? videoMediaUrls.Take(1)
+                : mediaUrls.Take(4);
+            var mediaBinaries = attachMediaUrls
+                .Select(x => new BinaryReader(
+                    WebRequest.Create(x).GetResponse().GetResponseStream()
+                ).ReadAllBytes()).ToList();
             // TODO メッセージをURLなどを考慮した長さに正規化する
             // TODO 添付の仕方を見直す（ビデオ対応など。。。）
             // https://github.com/linvi/tweetinvi/issues/53
-            var mediaBinaries = mediaUrls.Take(4)
-                    .Select(x => new BinaryReader(
-                        WebRequest.Create(x).GetResponse().GetResponseStream()
-                    ).ReadAllBytes()).ToList();
             return Tweetinvi.Tweet.PublishTweet(
                 $"{atNames} {messageText}".SafeSubstring(0, 140),
                 new PublishTweetOptionalParameters

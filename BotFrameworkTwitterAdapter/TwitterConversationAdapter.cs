@@ -1,4 +1,4 @@
-﻿using BotFrameworkTwitterAdapter.Services;
+using BotFrameworkTwitterAdapter.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
@@ -98,6 +98,8 @@ namespace BotFrameworkTwitterAdapter
             }
 
             // TODO validate
+            // 当面変なリクエストを送られても問題はない気はする
+            // OnTweetReceivedAsync でAPIKey的なモノをヘッダに指定して参考コードと同じ検証をしてやればいい。
             //if (_options.ValidateIncomingZoomRequests &&
             //    httpRequest.Headers.TryGetValue("HeaderAuthorization", out StringValues headerAuthorization)
             //    && headerAuthorization.FirstOrDefault() != _options.VerificationToken)
@@ -111,7 +113,8 @@ namespace BotFrameworkTwitterAdapter
                 body = await sr.ReadToEndAsync();
             }
 
-            var tweetRequest = JsonConvert.DeserializeObject<TweetDTO>(body);
+            // https://github.com/linvi/tweetinvi/wiki/Serialization-and-Deserialization
+            var tweetRequest = Tweetinvi.JsonSerializer.ConvertJsonTo<ITweetDTO>(body);
 
             if (!twitterService.IsSendToBot(tweetRequest))
             {
