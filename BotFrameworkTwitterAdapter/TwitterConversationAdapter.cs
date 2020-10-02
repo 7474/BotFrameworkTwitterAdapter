@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
-using RealDiceCommon.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tweetinvi.Events;
 using Tweetinvi.Logic.DTO;
-using Tweetinvi.Models;
 using Tweetinvi.Models.DTO;
 
 namespace BotFrameworkTwitterAdapter
@@ -74,7 +73,7 @@ namespace BotFrameworkTwitterAdapter
         {
             // ProcessAsync へバイパスするリクエストを行う。
             var res = await botTwitterApiClient.PostAsync("",
-                new StringContent(RealDiceConverter.Serialize(messageEventArgs.Tweet.TweetDTO)));
+                new StringContent(JsonConvert.SerializeObject(messageEventArgs.Tweet.TweetDTO)));
             if ((int)res.StatusCode >= 300)
             {
                 throw new IOException($"Tweet process request failed. {res.StatusCode}");
@@ -112,7 +111,7 @@ namespace BotFrameworkTwitterAdapter
                 body = await sr.ReadToEndAsync();
             }
 
-            var tweetRequest = RealDiceConverter.Deserialize<TweetDTO>(body);
+            var tweetRequest = JsonConvert.DeserializeObject<TweetDTO>(body);
 
             if (!twitterService.IsSendToBot(tweetRequest))
             {

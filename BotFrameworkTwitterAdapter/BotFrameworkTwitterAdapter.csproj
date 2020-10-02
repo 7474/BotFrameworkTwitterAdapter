@@ -22,8 +22,4 @@
     <Folder Include="Models\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\RealDiceBot\RealDiceCommon\RealDiceCommon.csproj" />
-  </ItemGroup>
-
 </Project>
