@@ -111,7 +111,8 @@ namespace BotFrameworkTwitterAdapter
                 body = await sr.ReadToEndAsync();
             }
 
-            var tweetRequest = JsonConvert.DeserializeObject<TweetDTO>(body);
+            // https://github.com/linvi/tweetinvi/wiki/Serialization-and-Deserialization
+            var tweetRequest = Tweetinvi.JsonSerializer.ConvertJsonTo<ITweetDTO>(body);
 
             if (!twitterService.IsSendToBot(tweetRequest))
             {
