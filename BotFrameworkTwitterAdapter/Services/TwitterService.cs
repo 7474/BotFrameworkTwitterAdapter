@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using Tweetinvi.Models;
+using Tweetinvi.Models.DTO;
 using Tweetinvi.Parameters;
 
 namespace BotFrameworkTwitterAdapter.Services
@@ -31,7 +32,7 @@ namespace BotFrameworkTwitterAdapter.Services
 
         private readonly ILogger<TwitterService> logger;
 
-        public TwitterService(IOptions<TwitterConversationOptions> options, ILoggerFactory loggerFactory)
+        public TwitterService(IOptions<TwitterServiceOptions> options, ILoggerFactory loggerFactory)
         {
             logger = loggerFactory.CreateLogger<TwitterService>();
             var option = options.Value;
@@ -133,6 +134,12 @@ namespace BotFrameworkTwitterAdapter.Services
                     InReplyToTweet = replyTo,
                     MediaBinaries = mediaBinaries,
                 });
+        }
+
+        public bool IsSendToBot(ITweetDTO tweet)
+        {
+            return tweet.InReplyToUserId.HasValue
+                && tweet.InReplyToUserId.Value == _botUser.Id;
         }
     }
 }

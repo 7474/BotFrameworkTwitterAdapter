@@ -6,13 +6,18 @@ namespace BotFrameworkTwitterAdapter
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddTwitterConversationAdapter(this IServiceCollection collection, Action<TwitterConversationOptions> contextDelegate)
+        public static void AddTwitterConversationAdapter(
+            this IServiceCollection collection,
+            Action<TwitterServiceOptions> serviceContextDelegate,
+            Action<TwitterConversationAdapterOptions> adapterContextDelegate
+        )
         {
             collection.AddSingleton<TwitterService>();
             collection.AddSingleton<TwitterConversationAdapter>();
 
             collection.AddOptions();
-            collection.Configure(contextDelegate);
+            collection.Configure(serviceContextDelegate);
+            collection.Configure(adapterContextDelegate);
         }
     }
 }
