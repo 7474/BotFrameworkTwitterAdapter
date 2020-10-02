@@ -1,6 +1,6 @@
 ﻿namespace BotFrameworkTwitterAdapter
 {
-    public class TwitterConversationOptions
+    public class TwitterServiceOptions
     {
         public string ConsumerKey { get; set; }
         public string ConsumerSecret { get; set; }

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Authors>koudenpa</Authors>
     <Product />
     <Company />
@@ -14,11 +14,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Bot.Builder" Version="4.10.3" />
+    <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.10.3" />
     <PackageReference Include="TweetinviAPI" Version="4.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\RealDiceBot\RealDiceCommon\RealDiceCommon.csproj" />
   </ItemGroup>
 
 </Project>
