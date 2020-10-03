@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,12 +17,6 @@ namespace BotFrameworkTwitterAdapter.Services
 {
     public class TwitterService : IDisposable
     {
-        public bool IsReady
-        {
-            get;
-            private set;
-        }
-
         /// <summary>
         /// Fired when a @ tweet is received.
         /// </summary>
@@ -29,6 +24,7 @@ namespace BotFrameworkTwitterAdapter.Services
 
         private IUser _botUser;
         private Tweetinvi.Streaming.IFilteredStream _filteredStream;
+        private BackgroundWorker streamWorker;
 
         private readonly ILogger<TwitterService> logger;
 
@@ -56,13 +52,34 @@ namespace BotFrameworkTwitterAdapter.Services
                 Tweetinvi.Auth.SetUserCredentials(option.ConsumerKey, option.ConsumerSecret, option.AccessToken, option.AccessTokenSecret);
             }
             _botUser = Tweetinvi.User.GetAuthenticatedUser();
+            streamWorker = new BackgroundWorker
+            {
+                WorkerSupportsCancellation = true,
+            };
+            streamWorker.DoWork += ProcessStream;
+        }
+
+        private async void ProcessStream(object sender, DoWorkEventArgs e)
+        {
+            var worker = sender as BackgroundWorker;
+            while (!worker.CancellationPending)
+            {
+                try
+                {
+                    await _filteredStream.StartStreamMatchingAllConditionsAsync();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error Twitter converstain stream. " + ex.Message);
+                }
+            }
         }
 
         public void Dispose()
         {
             if (_filteredStream != null)
             {
-                _filteredStream.StreamStarted -= OnStreamStarted;
+                streamWorker.CancelAsync();
                 _filteredStream.MatchingTweetReceived -= OnMatchingTweetReceived;
                 _filteredStream.StopStream();
                 _filteredStream = null;
@@ -71,27 +88,19 @@ namespace BotFrameworkTwitterAdapter.Services
 
         public void StartStream()
         {
-            logger.LogInformation("Twitter stream start");
             if (_filteredStream == null)
             {
                 // For Reply
                 _filteredStream = Tweetinvi.Stream.CreateFilteredStream();
                 _filteredStream.AddTrack("@" + _botUser.ScreenName);
-                _filteredStream.StreamStarted += OnStreamStarted;
                 _filteredStream.MatchingTweetReceived += OnMatchingTweetReceived;
-                // TODO これに限らず例外処理と継続は見ておく
-                _filteredStream.StartStreamMatchingAllConditionsAsync();
+                streamWorker.RunWorkerAsync();
+                logger.LogInformation("Twitter stream start");
             }
             else
             {
                 logger.LogWarning("Twitter stream already started");
             }
-        }
-
-        private void OnStreamStarted(object sender, EventArgs e)
-        {
-            logger.LogInformation("Twitter stream started");
-            IsReady = true;
         }
 
         private void OnMatchingTweetReceived(object sender, Tweetinvi.Events.MatchedTweetReceivedEventArgs e)

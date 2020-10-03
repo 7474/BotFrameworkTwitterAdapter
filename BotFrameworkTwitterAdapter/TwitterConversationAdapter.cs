@@ -143,12 +143,7 @@ namespace BotFrameworkTwitterAdapter
                 Recipient = new ChannelAccount(tweet.InReplyToUserIdStr, tweet.InReplyToScreenName),
                 Conversation = new ConversationAccount { Id = conversationId },
                 ChannelId = "twitter_conversation",
-                // Fix TrustServiceUrl
-                // https://github.com/microsoft/botbuilder-dotnet/blob/3a0dcfee003a7fcd0271c6336ab2c166f9a74313/libraries/Microsoft.Bot.Builder/BotFrameworkAdapter.cs#L368
-                // XXX どういう理由で ServiceUrl が求められているのか分かっていない
-                //ServiceUrl = option.BotTwitterApiEndpoint,
-                // XXX 会話継続時のActivity送信先っぽいのでDirectlineを指定しておけばいい？
-                ServiceUrl = "https://directline.botframework.com/",
+                ServiceUrl = option.BotTwitterApiEndpoint,
             };
         }
 
